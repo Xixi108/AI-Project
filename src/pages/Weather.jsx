@@ -1,28 +1,27 @@
-﻿import { useState, useEffect, useCallback, useRef } from 'react'
-
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 const WMO_CODES = {
-  0: { label: 'Clear sky', icon: 'â˜€ï¸' },
-  1: { label: 'Mainly clear', icon: 'ðŸŒ¤ï¸' },
-  2: { label: 'Partly cloudy', icon: 'â›…' },
-  3: { label: 'Overcast', icon: 'â˜ï¸' },
-  45: { label: 'Foggy', icon: 'ðŸŒ«ï¸' },
-  48: { label: 'Icy fog', icon: 'ðŸŒ«ï¸' },
-  51: { label: 'Light drizzle', icon: 'ðŸŒ¦ï¸' },
-  53: { label: 'Drizzle', icon: 'ðŸŒ¦ï¸' },
-  55: { label: 'Heavy drizzle', icon: 'ðŸŒ§ï¸' },
-  61: { label: 'Light rain', icon: 'ðŸŒ§ï¸' },
-  63: { label: 'Rain', icon: 'ðŸŒ§ï¸' },
-  65: { label: 'Heavy rain', icon: 'ðŸŒ§ï¸' },
-  71: { label: 'Light snow', icon: 'ðŸŒ¨ï¸' },
-  73: { label: 'Snow', icon: 'â„ï¸' },
-  75: { label: 'Heavy snow', icon: 'â„ï¸' },
-  80: { label: 'Rain showers', icon: 'ðŸŒ¦ï¸' },
-  81: { label: 'Showers', icon: 'ðŸŒ§ï¸' },
-  82: { label: 'Heavy showers', icon: 'â›ˆï¸' },
-  95: { label: 'Thunderstorm', icon: 'â›ˆï¸' },
-  96: { label: 'Thunderstorm w/ hail', icon: 'â›ˆï¸' },
-  99: { label: 'Thunderstorm w/ heavy hail', icon: 'â›ˆï¸' },
+  0: { label: 'Clear sky', icon: '☀️' },
+  1: { label: 'Mainly clear', icon: '🌤️' },
+  2: { label: 'Partly cloudy', icon: '⛅' },
+  3: { label: 'Overcast', icon: '☁️' },
+  45: { label: 'Foggy', icon: '🌫️' },
+  48: { label: 'Icy fog', icon: '🌫️' },
+  51: { label: 'Light drizzle', icon: '🌦️' },
+  53: { label: 'Drizzle', icon: '🌦️' },
+  55: { label: 'Heavy drizzle', icon: '🌧️' },
+  61: { label: 'Light rain', icon: '🌧️' },
+  63: { label: 'Rain', icon: '🌧️' },
+  65: { label: 'Heavy rain', icon: '🌧️' },
+  71: { label: 'Light snow', icon: '🌨️' },
+  73: { label: 'Snow', icon: '❄️' },
+  75: { label: 'Heavy snow', icon: '❄️' },
+  80: { label: 'Rain showers', icon: '🌦️' },
+  81: { label: 'Showers', icon: '🌧️' },
+  82: { label: 'Heavy showers', icon: '⛈️' },
+  95: { label: 'Thunderstorm', icon: '⛈️' },
+  96: { label: 'Thunderstorm w/ hail', icon: '⛈️' },
+  99: { label: 'Thunderstorm w/ heavy hail', icon: '⛈️' },
 }
 
 const THEMES = {
@@ -73,7 +72,7 @@ const THEMES = {
 const DEFAULT_CITY = { name: 'Manila', admin: 'Metro Manila', lat: 14.60, lon: 120.98 }
 
 function wmo(code) {
-  return WMO_CODES[code] ?? { label: 'Unknown', icon: 'ðŸŒ¡ï¸' }
+  return WMO_CODES[code] ?? { label: 'Unknown', icon: '🌡️' }
 }
 
 async function reverseGeocode(lat, lon) {
@@ -163,9 +162,7 @@ function CitySearch({ city, onSelect, t }) {
 
   useEffect(() => {
     function handleClick(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpen(false)
-      }
+      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -194,16 +191,12 @@ function CitySearch({ city, onSelect, t }) {
   }
 
   async function handleLocate() {
-    if (!navigator.geolocation) {
-      setLocateError('Geolocation is not supported by your browser.')
-      return
-    }
+    if (!navigator.geolocation) { setLocateError('Geolocation is not supported.'); return }
     setLocating(true)
     setLocateError(null)
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        const { latitude, longitude } = pos.coords
-        const found = await reverseGeocode(latitude, longitude)
+        const found = await reverseGeocode(pos.coords.latitude, pos.coords.longitude)
         if (found) onSelect(found)
         else setLocateError('Could not determine your location name.')
         setLocating(false)
@@ -231,41 +224,32 @@ function CitySearch({ city, onSelect, t }) {
             placeholder={`${city.name}${city.admin ? `, ${city.admin}` : ''}`}
             className={`bg-transparent outline-none flex-1 text-sm ${t.searchInput}`}
           />
-          {searching && <span className={`text-xs animate-pulse ${t.textMuted}`}>Searchingâ€¦</span>}
+          {searching && <span className={`text-xs animate-pulse ${t.textMuted}`}>Searching...</span>}
           {query && (
-            <button onClick={() => { setQuery(''); setResults([]); setOpen(false) }} className={`text-lg leading-none ${t.clearBtn}`}>Ã—</button>
+            <button onClick={() => { setQuery(''); setResults([]); setOpen(false) }} className={`text-lg leading-none ${t.clearBtn}`}>×</button>
           )}
         </div>
-
-        {/* Locate me button */}
         <button
           onClick={handleLocate}
           disabled={locating}
-          title="Use my current location"
           className={`rounded-xl px-4 py-3 text-sm font-medium transition-all disabled:opacity-50 flex items-center gap-2 whitespace-nowrap ${t.locateBtn}`}
         >
-          {locating ? (
-            <span className="animate-spin inline-block">âŸ³</span>
-          ) : (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 0v4m0 12v4M2 12h4m12 0h4" />
-              <circle cx="12" cy="12" r="3" fill="currentColor" />
-            </svg>
-          )}
-          {locating ? 'Locatingâ€¦' : 'My Location'}
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 0v4m0 12v4M2 12h4m12 0h4" />
+            <circle cx="12" cy="12" r="3" fill="currentColor" />
+          </svg>
+          {locating ? 'Locating...' : 'My Location'}
         </button>
       </div>
 
-      {locateError && (
-        <p className={`text-xs px-1 ${t.textMuted}`}>{locateError}</p>
-      )}
+      {locateError && <p className={`text-xs px-1 ${t.textMuted}`}>{locateError}</p>}
 
       {open && results.length > 0 && (
-        <ul className={`absolute z-10 mt-2 w-full backdrop-blur rounded-xl overflow-hidden shadow-xl ${t.dropdown}`}>
+        <ul className={`absolute top-full z-10 mt-2 w-full backdrop-blur rounded-xl overflow-hidden shadow-xl ${t.dropdown}`}>
           {results.map((r, i) => (
             <li key={i}>
               <button onClick={() => handleSelect(r)} className={`w-full text-left px-4 py-3 transition-colors flex items-center gap-3 ${t.dropdownHover}`}>
-                <span className="text-lg">ðŸ“</span>
+                <span className="text-lg">📍</span>
                 <div>
                   <div className={`text-sm font-medium ${t.textPrimary}`}>{r.name}</div>
                   <div className={`text-xs ${t.textMuted}`}>{[r.admin1, r.admin2].filter(Boolean).join(', ')}</div>
@@ -277,7 +261,7 @@ function CitySearch({ city, onSelect, t }) {
       )}
 
       {open && query && !searching && results.length === 0 && (
-        <div className={`absolute z-10 mt-2 w-full backdrop-blur rounded-xl px-4 py-3 text-sm shadow-xl ${t.dropdown} ${t.textMuted}`}>
+        <div className={`absolute top-full z-10 mt-2 w-full backdrop-blur rounded-xl px-4 py-3 text-sm shadow-xl ${t.dropdown} ${t.textMuted}`}>
           No Philippine locations found for "{query}"
         </div>
       )}
@@ -306,7 +290,7 @@ function HourlyBar({ hours, t }) {
           <div key={i} className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 min-w-[60px] ${t.cardInner}`}>
             <span className={`text-xs ${t.textSecondary}`}>{h.time}</span>
             <span className="text-lg">{wmo(h.code).icon}</span>
-            <span className={`text-sm font-semibold ${t.textPrimary}`}>{h.temp}Â°</span>
+            <span className={`text-sm font-semibold ${t.textPrimary}`}>{h.temp}°</span>
           </div>
         ))}
       </div>
@@ -321,8 +305,8 @@ function DailyRow({ day, t }) {
       <span className="text-xl">{wmo(day.code).icon}</span>
       <span className={`text-sm flex-1 text-center ${t.textSecondary}`}>{wmo(day.code).label}</span>
       <div className="flex gap-3 text-sm font-medium">
-        <span className={t.textPrimary}>{day.max}Â°</span>
-        <span className={t.minTemp}>{day.min}Â°</span>
+        <span className={t.textPrimary}>{day.max}°</span>
+        <span className={t.minTemp}>{day.min}°</span>
       </div>
     </div>
   )
@@ -359,82 +343,54 @@ export default function Weather() {
   return (
     <div className={`min-h-screen bg-gradient-to-br transition-colors duration-500 ${t.bg} p-4 md:p-8`}>
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
-
-        {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className={`text-2xl font-bold tracking-tight ${t.heading}`}>ðŸ‡µðŸ‡­ Philippine Weather</h1>
+          <h1 className={`text-2xl font-bold tracking-tight ${t.heading}`}>🇵🇭 Philippine Weather</h1>
           <div className="flex items-center gap-3">
-            {/* Day/Night toggle */}
-            <button
-              onClick={() => setIsDark(d => !d)}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-300 ${t.toggleBtn}`}
-              title={isDark ? 'Switch to day mode' : 'Switch to night mode'}
-            >
-              {isDark ? 'â˜€ï¸ Day' : 'ðŸŒ™ Night'}
+            <button onClick={() => setIsDark(d => !d)} className={`rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-300 ${t.toggleBtn}`}>
+              {isDark ? '☀️ Day' : '🌙 Night'}
             </button>
-            <button
-              onClick={load}
-              disabled={loading}
-              className={`text-sm transition-colors disabled:opacity-50 ${t.refreshBtn}`}
-            >
-              {loading ? 'âŸ³ Refreshingâ€¦' : 'â†º Refresh'}
+            <button onClick={load} disabled={loading} className={`text-sm transition-colors disabled:opacity-50 ${t.refreshBtn}`}>
+              {loading ? 'Refreshing...' : 'Refresh'}
             </button>
           </div>
         </div>
 
-        {/* Search */}
         <CitySearch city={city} onSelect={c => { setCity(c); setWeather(null) }} t={t} />
 
-        {error && (
-          <div className={`rounded-xl p-4 text-sm ${t.error}`}>
-            {error} â€” check your connection and try again.
-          </div>
-        )}
+        {error && <div className={`rounded-xl p-4 text-sm ${t.error}`}>{error}</div>}
 
         {loading && !weather && (
-          <div className={`text-center py-16 text-lg animate-pulse ${t.textSecondary}`}>
-            Loading weatherâ€¦
-          </div>
+          <div className={`text-center py-16 text-lg animate-pulse ${t.textSecondary}`}>Loading weather...</div>
         )}
 
         {weather && (
           <>
-            {/* Current conditions */}
             <div className={`backdrop-blur rounded-2xl p-6 flex flex-col gap-2 ${t.card}`}>
               <div className="flex items-start justify-between">
                 <div>
                   <div className={`text-sm font-medium mb-1 ${t.textSecondary}`}>
                     {city.name}{city.admin ? `, ${city.admin}` : ''}
                   </div>
-                  <div className={`text-7xl font-thin leading-none ${t.tempText}`}>
-                    {weather.temp}{weather.unit}
-                  </div>
-                  <div className={`mt-2 text-sm ${t.textSecondary}`}>
-                    Feels like {weather.feels}{weather.unit}
-                  </div>
+                  <div className={`text-7xl font-thin leading-none ${t.tempText}`}>{weather.temp}{weather.unit}</div>
+                  <div className={`mt-2 text-sm ${t.textSecondary}`}>Feels like {weather.feels}{weather.unit}</div>
                 </div>
                 <div className="text-6xl">{condition.icon}</div>
               </div>
               <div className={`font-medium text-lg mt-1 ${t.textPrimary}`}>{condition.label}</div>
-              {lastUpdated && (
-                <div className={`text-xs mt-1 ${t.textMuted}`}>Updated at {lastUpdated}</div>
-              )}
+              {lastUpdated && <div className={`text-xs mt-1 ${t.textMuted}`}>Updated at {lastUpdated}</div>}
             </div>
 
-            {/* Stats grid */}
             <div className="grid grid-cols-3 gap-3">
               <StatCard label="Humidity" value={weather.humidity} unit="%" t={t} />
               <StatCard label="Wind" value={weather.wind} unit="km/h" t={t} />
               <StatCard label="Precip." value={weather.precip} unit="mm" t={t} />
             </div>
 
-            {/* Hourly forecast */}
             <div className={`backdrop-blur rounded-2xl p-5 flex flex-col gap-3 ${t.card}`}>
               <h2 className={`font-semibold ${t.textPrimary}`}>Next 12 Hours</h2>
               <HourlyBar hours={weather.hours} t={t} />
             </div>
 
-            {/* 7-day forecast */}
             <div className={`backdrop-blur rounded-2xl p-5 flex flex-col gap-3 ${t.card}`}>
               <h2 className={`font-semibold ${t.textPrimary}`}>7-Day Forecast</h2>
               <div className="flex flex-col gap-2">
@@ -447,4 +403,3 @@ export default function Weather() {
     </div>
   )
 }
-
