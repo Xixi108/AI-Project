@@ -1,6 +1,5 @@
-﻿import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import Papa from 'papaparse'
-
 
 const SAMPLE_CSV = `name,email,company,role,status
 Maria Santos,maria@example.com,TechCorp PH,CEO,new lead
@@ -11,7 +10,7 @@ Liza Cruz,liza@example.com,CloudMNL,COO,new lead`
 
 const STATUS_DEFAULTS = {
   'new lead': {
-    subject: `Introduction â€” Exciting Opportunity for {{company}}`,
+    subject: `Introduction — Exciting Opportunity for {{company}}`,
     body: `Hi {{name}},
 
 I hope this message finds you well! I came across {{company}} and was truly impressed by what your team is building.
@@ -26,17 +25,17 @@ Best regards,
 [Your Name]`,
   },
   'follow up': {
-    subject: `Following Up â€” {{company}}`,
+    subject: `Following Up — {{company}}`,
     body: `Hi {{name}},
 
 I wanted to follow up on my previous message regarding a potential collaboration with {{company}}.
 
-I understand you're busy, so I'll keep this brief â€” I truly believe there's a strong fit here and would love just 15 minutes of your time to explore it further.
+I understand you're busy, so I'll keep this brief — I truly believe there's a strong fit here and would love just 15 minutes of your time to explore it further.
 
 Would any of these times work for you?
-â€¢ Monday at 10am
-â€¢ Wednesday at 2pm
-â€¢ Friday at 11am
+• Monday at 10am
+• Wednesday at 2pm
+• Friday at 11am
 
 Feel free to suggest a time that works better for you.
 
@@ -44,7 +43,7 @@ Best regards,
 [Your Name]`,
   },
   'pending': {
-    subject: `Quick Check-In â€” {{company}}`,
+    subject: `Quick Check-In — {{company}}`,
     body: `Hi {{name}},
 
 Just a quick check-in regarding our ongoing conversation about {{company}}.
@@ -59,7 +58,7 @@ Best regards,
 [Your Name]`,
   },
   'closed': {
-    subject: `Thank You, {{name}} â€” Welcome Aboard!`,
+    subject: `Thank You, {{name}} — Welcome Aboard!`,
     body: `Hi {{name}},
 
 Congratulations and welcome! We're thrilled to have {{company}} on board.
@@ -67,9 +66,9 @@ Congratulations and welcome! We're thrilled to have {{company}} on board.
 As the {{role}}, your vision and trust mean a lot to us, and we're committed to delivering exceptional results for your team.
 
 Here's what happens next:
-â€¢ Our onboarding team will reach out within 24 hours
-â€¢ You'll receive login credentials to your dashboard
-â€¢ A kickoff call will be scheduled at your convenience
+• Our onboarding team will reach out within 24 hours
+• You'll receive login credentials to your dashboard
+• A kickoff call will be scheduled at your convenience
 
 Thank you again for choosing us. We look forward to a great partnership!
 
@@ -125,7 +124,7 @@ function Step({ n, label, done }) {
   return (
     <div className="flex items-center gap-2">
       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${done ? 'bg-violet-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
-        {done ? 'âœ“' : n}
+        {done ? '✓' : n}
       </div>
       <span className={`text-sm ${done ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>{label}</span>
     </div>
@@ -139,17 +138,12 @@ export default function EmailGenerator() {
   const [dragOver, setDragOver] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [copied, setCopied] = useState(null)
-
-  // status column key (auto-detected)
   const [statusKey, setStatusKey] = useState(null)
-  // per-status templates: { [normalizedStatus]: { subject, body } }
   const [statusTemplates, setStatusTemplates] = useState({})
-  // which status tab is open in the editor
   const [editingStatus, setEditingStatus] = useState(null)
 
   const fileRef = useRef()
 
-  // unique normalized statuses from data
   const statusList = useMemo(() => {
     if (!statusKey) return []
     const seen = new Set()
@@ -168,12 +162,10 @@ export default function EmailGenerator() {
     setHeaders(hdrs)
     setActiveIndex(0)
 
-    // auto-detect status column
     const key = hdrs.find(h => normalizeStatus(h) === 'status') ?? null
     setStatusKey(key)
 
     if (key) {
-      // build initial templates from defaults
       const seen = new Set()
       result.data.forEach(r => {
         const s = normalizeStatus(r[key])
@@ -226,7 +218,6 @@ export default function EmailGenerator() {
     }))
   }
 
-  // get the right template for a given row
   function getTemplate(row) {
     if (statusKey) {
       const s = normalizeStatus(row[statusKey])
@@ -247,8 +238,8 @@ export default function EmailGenerator() {
       const sub = fillTemplate(tpl.subject, row)
       const body = fillTemplate(tpl.body, row)
       const status = statusKey ? ` [${row[statusKey]}]` : ''
-      return `=== Email ${i + 1}${status} â€” ${row.email ?? ''} ===\nSubject: ${sub}\n\n${body}`
-    }).join('\n\n' + 'â”€'.repeat(60) + '\n\n')
+      return `=== Email ${i + 1}${status} — ${row.email ?? ''} ===\nSubject: ${sub}\n\n${body}`
+    }).join('\n\n' + '─'.repeat(60) + '\n\n')
 
     const blob = new Blob([content], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
@@ -265,15 +256,13 @@ export default function EmailGenerator() {
   const previewBody = fillTemplate(currentTemplate.body, currentRow)
   const hasUnfilled = previewBody.includes('{{') || previewSubject.includes('{{')
   const currentStatus = statusKey ? normalizeStatus(currentRow[statusKey]) : null
-
   const editingTpl = editingStatus ? (statusTemplates[editingStatus] ?? FALLBACK_TEMPLATE) : null
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">âœ‰</div>
+          <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">✉</div>
           <div>
             <h1 className="text-base font-semibold text-gray-900 leading-none">CSV Email Generator</h1>
             <p className="text-xs text-gray-400 mt-0.5">Personalized emails from spreadsheet data</p>
@@ -289,11 +278,8 @@ export default function EmailGenerator() {
       </header>
 
       <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* LEFT COLUMN */}
         <div className="flex flex-col gap-6">
 
-          {/* CSV Upload */}
           <section className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-gray-900">1. Upload CSV</h2>
@@ -312,9 +298,9 @@ export default function EmailGenerator() {
               onClick={() => fileRef.current.click()}
               className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${dragOver ? 'border-violet-400 bg-violet-50' : 'border-gray-200 hover:border-violet-300 hover:bg-gray-50'}`}
             >
-              <div className="text-3xl mb-2">ðŸ“‚</div>
+              <div className="text-3xl mb-2">📂</div>
               <p className="text-sm font-medium text-gray-700">Drop a CSV file here or click to browse</p>
-              <p className="text-xs text-gray-400 mt-1">{fileName ?? 'No file selected â€” include a "status" column for auto-templates'}</p>
+              <p className="text-xs text-gray-400 mt-1">{fileName ?? 'No file selected — include a "status" column for auto-templates'}</p>
               <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={e => handleFile(e.target.files[0])} />
             </div>
 
@@ -327,7 +313,6 @@ export default function EmailGenerator() {
               Load sample CSV (includes status column)
             </button>
 
-            {/* CSV table */}
             {rows.length > 0 && (
               <div className="overflow-x-auto rounded-xl border border-gray-100">
                 <table className="w-full text-xs">
@@ -358,7 +343,6 @@ export default function EmailGenerator() {
             )}
           </section>
 
-          {/* Template Editor */}
           {rows.length > 0 && (
             <section className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4">
               <h2 className="font-semibold text-gray-900">2. Email Templates by Status</h2>
@@ -369,7 +353,6 @@ export default function EmailGenerator() {
                 </div>
               )}
 
-              {/* Status tabs */}
               {statusList.length > 0 && (
                 <div className="flex gap-2 flex-wrap">
                   {statusList.map(s => (
@@ -386,7 +369,6 @@ export default function EmailGenerator() {
 
               {editingTpl && editingStatus && (
                 <>
-                  {/* Placeholder chips */}
                   {headers.length > 0 && (
                     <div>
                       <p className="text-xs text-gray-500 mb-2">Insert field into body:</p>
@@ -402,8 +384,7 @@ export default function EmailGenerator() {
 
                   <div className="flex flex-col gap-2">
                     <label className="text-xs font-medium text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                      Subject
-                      <Badge color={statusColor(editingStatus, statusList)}>{editingStatus}</Badge>
+                      Subject <Badge color={statusColor(editingStatus, statusList)}>{editingStatus}</Badge>
                     </label>
                     <input
                       value={editingTpl.subject}
@@ -427,64 +408,59 @@ export default function EmailGenerator() {
           )}
         </div>
 
-        {/* RIGHT COLUMN â€” Preview */}
         <div className="flex flex-col gap-6">
-          <section className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4 sticky top-6">
+          <section className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4 sticky top-20">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="font-semibold text-gray-900">3. Preview & Export</h2>
               {rows.length > 0 && (
                 <button onClick={downloadAll} className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm px-4 py-2 rounded-xl font-medium transition-colors">
-                  â¬‡ Download All ({rows.length})
+                  ⬇ Download All ({rows.length})
                 </button>
               )}
             </div>
 
             {rows.length === 0 ? (
               <div className="text-center py-16 text-gray-300">
-                <div className="text-5xl mb-3">âœ‰ï¸</div>
+                <div className="text-5xl mb-3">✉️</div>
                 <p className="text-sm">Upload a CSV to see previews here</p>
               </div>
             ) : (
               <>
-                {/* Contact selector */}
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setActiveIndex(i => Math.max(0, i - 1))} disabled={activeIndex === 0} className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-30 transition">â€¹</button>
+                  <button onClick={() => setActiveIndex(i => Math.max(0, i - 1))} disabled={activeIndex === 0} className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-30 transition">‹</button>
                   <div className="flex-1 text-center">
                     <span className="text-sm text-gray-600">
                       Contact <span className="font-semibold text-gray-900">{activeIndex + 1}</span> of {rows.length}
-                      {currentRow.name && <span className="text-gray-400"> â€” {currentRow.name}</span>}
+                      {currentRow.name && <span className="text-gray-400"> — {currentRow.name}</span>}
                     </span>
                     {currentStatus && (
                       <div className="mt-1 flex justify-center">
-                        <Badge color={statusColor(currentStatus, statusList)}>
-                          Template: {currentStatus}
-                        </Badge>
+                        <Badge color={statusColor(currentStatus, statusList)}>Template: {currentStatus}</Badge>
                       </div>
                     )}
                   </div>
-                  <button onClick={() => setActiveIndex(i => Math.min(rows.length - 1, i + 1))} disabled={activeIndex === rows.length - 1} className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-30 transition">â€º</button>
+                  <button onClick={() => setActiveIndex(i => Math.min(rows.length - 1, i + 1))} disabled={activeIndex === rows.length - 1} className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-30 transition">›</button>
                 </div>
 
                 {hasUnfilled && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700 flex items-center gap-2">
-                    âš ï¸ Some placeholders don't match your CSV columns.
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700">
+                    ⚠️ Some placeholders don't match your CSV columns.
                   </div>
                 )}
 
-                {/* Email preview */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden">
                   <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex flex-col gap-1">
                     <div className="flex items-start gap-2 text-sm">
                       <span className="text-gray-400 w-12 shrink-0">To:</span>
-                      <span className="text-gray-700 font-medium">{currentRow.email ?? 'â€”'}</span>
+                      <span className="text-gray-700 font-medium">{currentRow.email ?? '—'}</span>
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <span className="text-gray-400 w-12 shrink-0">Subject:</span>
-                      <span className="text-gray-900 font-medium">{previewSubject || 'â€”'}</span>
+                      <span className="text-gray-900 font-medium">{previewSubject || '—'}</span>
                     </div>
                   </div>
                   <div className="p-4 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed max-h-[380px] overflow-y-auto">
-                    {previewBody || <span className="text-gray-300">Your email body will appear hereâ€¦</span>}
+                    {previewBody || <span className="text-gray-300">Your email body will appear here...</span>}
                   </div>
                 </div>
 
@@ -493,13 +469,13 @@ export default function EmailGenerator() {
                     onClick={() => copyEmail(`Subject: ${previewSubject}\n\n${previewBody}`)}
                     className="flex-1 flex items-center justify-center gap-2 border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-sm font-medium py-2.5 rounded-xl transition-colors text-gray-700"
                   >
-                    {copied === activeIndex ? 'âœ“ Copied!' : 'ðŸ“‹ Copy Email'}
+                    {copied === activeIndex ? '✓ Copied!' : '📋 Copy Email'}
                   </button>
                   <button
                     onClick={() => window.open(`mailto:${currentRow.email ?? ''}?subject=${encodeURIComponent(previewSubject)}&body=${encodeURIComponent(previewBody)}`)}
                     className="flex-1 flex items-center justify-center gap-2 border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-sm font-medium py-2.5 rounded-xl transition-colors text-gray-700"
                   >
-                    ðŸ“¨ Open in Mail
+                    📨 Open in Mail
                   </button>
                 </div>
               </>
@@ -510,4 +486,3 @@ export default function EmailGenerator() {
     </div>
   )
 }
-
